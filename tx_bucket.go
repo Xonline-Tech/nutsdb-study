@@ -14,7 +14,7 @@
 
 package nutsdb
 
-// IterateBuckets iterate over all the bucket depends on ds (represents the data structure)
+// IterateBuckets 遍历所有存储桶依赖于 ds（表示数据结构）
 func (tx *Tx) IterateBuckets(ds uint16, pattern string, f func(bucket string) bool) error {
 	if err := tx.checkTxIsClosed(); err != nil {
 		return err

@@ -34,13 +34,13 @@ import (
 	"github.com/xujiajun/utils/strconv2"
 )
 
-// ScanNoLimit represents the data scan no limit flag
+// ScanNoLimit 表示数据扫描无限制标志
 const ScanNoLimit int = -1
 const KvWriteChCapacity = 1000
 const FLockName = "nutsdb-flock"
 
 type (
-	// DB represents a collection of buckets that persist on disk.
+	// DB 表示保留在磁盘上的存储桶的集合。
 	DB struct {
 		opt                     Options // the database options
 		Index                   *index
@@ -64,7 +64,7 @@ type (
 	}
 )
 
-// open returns a newly initialized DB object.
+// open 返回新初始化的 DB 对象。
 func open(opt Options) (*DB, error) {
 	db := &DB{
 		MaxFileID:               0,
@@ -83,12 +83,14 @@ func open(opt Options) (*DB, error) {
 
 	db.commitBuffer = createNewBufferWithSize(int(db.opt.CommitBufferSize))
 
+	// 如果路径不存在则创建
 	if ok := filesystem.PathIsExist(db.opt.Dir); !ok {
 		if err := os.MkdirAll(db.opt.Dir, os.ModePerm); err != nil {
 			return nil, err
 		}
 	}
 
+	// 文件加锁
 	fileLock := flock.New(filepath.Join(opt.Dir, FLockName))
 	if ok, err := fileLock.TryLock(); err != nil {
 		return nil, err
@@ -119,7 +121,7 @@ func open(opt Options) (*DB, error) {
 	return db, nil
 }
 
-// Open returns a newly initialized DB object with Option.
+// Open 使用 Option 返回一个新初始化的数据库对象.
 func Open(options Options, ops ...Option) (*DB, error) {
 	opts := &options
 	for _, do := range ops {
@@ -128,7 +130,7 @@ func Open(options Options, ops ...Option) (*DB, error) {
 	return open(*opts)
 }
 
-// Update executes a function within a managed read/write transaction.
+// Update 在托管读/写事务中执行函数。
 func (db *DB) Update(fn func(tx *Tx) error) error {
 	if fn == nil {
 		return ErrFn
@@ -137,7 +139,7 @@ func (db *DB) Update(fn func(tx *Tx) error) error {
 	return db.managed(true, fn)
 }
 
-// View executes a function within a managed read-only transaction.
+// View 在托管只读事务中执行函数。
 func (db *DB) View(fn func(tx *Tx) error) error {
 	if fn == nil {
 		return ErrFn
@@ -146,21 +148,21 @@ func (db *DB) View(fn func(tx *Tx) error) error {
 	return db.managed(false, fn)
 }
 
-// Backup copies the database to file directory at the given dir.
+// Backup 将数据库复制到给定目录下的文件目录。
 func (db *DB) Backup(dir string) error {
 	return db.View(func(tx *Tx) error {
 		return filesystem.CopyDir(db.opt.Dir, dir)
 	})
 }
 
-// BackupTarGZ Backup copy the database to writer.
+// BackupTarGZ Backup 将数据库复制到 Writer。
 func (db *DB) BackupTarGZ(w io.Writer) error {
 	return db.View(func(tx *Tx) error {
 		return tarGZCompress(w, db.opt.Dir)
 	})
 }
 
-// Close releases all db resources.
+// Close 释放所有数据库资源。
 func (db *DB) Close() error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
@@ -179,7 +181,7 @@ func (db *DB) Close() error {
 	return nil
 }
 
-// release set all obj in the db instance to nil
+// release 将数据库实例中的所有 OBJ 设置为 NIL
 func (db *DB) release() error {
 	GCEnable := db.opt.GCWhenClose
 
@@ -229,7 +231,7 @@ func (db *DB) getValueByRecord(record *Record) ([]byte, error) {
 		return record.Value, nil
 	}
 
-	// firstly we find data in cache
+	// 首先，我们在缓存中找到数据
 	if db.getHintKeyAndRAMIdxCacheSize() > 0 {
 		if value := db.hintKeyAndRAMIdxModeLru.Get(record); value != nil {
 			return value.(*Entry).Value, nil
@@ -315,12 +317,12 @@ func (db *DB) writeRequests(reqs []*request) error {
 	return err
 }
 
-// MaxBatchCount returns max possible entries in batch
+// MaxBatchCount 返回最大可能的批量条目大小
 func (db *DB) getMaxBatchCount() int64 {
 	return db.opt.MaxBatchCount
 }
 
-// MaxBatchSize returns max possible batch size
+// MaxBatchSize 返回最大可能的批量缓存大小
 func (db *DB) getMaxBatchSize() int64 {
 	return db.opt.MaxBatchSize
 }
@@ -390,7 +392,7 @@ func (db *DB) doWrites() {
 	}
 }
 
-// setActiveFile sets the ActiveFile (DataFile object).
+// setActiveFile 设置 ActiveFile（DataFile 对象）。
 func (db *DB) setActiveFile() (err error) {
 	activeFilePath := getDataPath(db.MaxFileID, db.opt.Dir)
 	db.ActiveFile, err = db.fm.getDataFile(activeFilePath, db.opt.SegmentSize)
@@ -403,7 +405,7 @@ func (db *DB) setActiveFile() (err error) {
 	return nil
 }
 
-// getMaxFileIDAndFileIds returns max fileId and fileIds.
+// getMaxFileIDAndFileIds 返回 max fileId 和 fileIds。
 func (db *DB) getMaxFileIDAndFileIDs() (maxFileID int64, dataFileIds []int) {
 	files, _ := os.ReadDir(db.opt.Dir)
 
@@ -443,9 +445,9 @@ func (db *DB) parseDataFiles(dataFileIds []int) (err error) {
 
 	parseDataInTx := func() error {
 		for _, entry := range dataInTx.es {
-			// if this bucket is not existed in bucket manager right now
-			// its because it already deleted in the feature WAL log.
-			// so we can just ignore here.
+			// 如果此存储桶目前在存储桶管理器中不存在
+			// 因为它已经在功能 WAL 日志中删除了。
+			// 所以我们可以忽略这里。
 			bucketId := entry.Meta.BucketId
 			if _, err := db.bm.GetBucketById(bucketId); errors.Is(err, ErrBucketNotExist) {
 				continue
@@ -467,7 +469,7 @@ func (db *DB) parseDataFiles(dataFileIds []int) (err error) {
 		for {
 			entry, err := f.readEntry(off)
 			if err != nil {
-				// whatever which logic branch it will choose, we will release the fd.
+				// 无论它选择哪个逻辑分支，我们都会释放 FD。
 				_ = f.release()
 				if errors.Is(err, io.EOF) || errors.Is(err, ErrIndexOutOfBound) || errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, ErrEntryZero) || errors.Is(err, ErrHeaderSizeOutOfBounds) {
 					break
@@ -535,7 +537,7 @@ func (db *DB) parseDataFiles(dataFileIds []int) (err error) {
 		}
 	}
 
-	// compute the valid record count and save it in db.RecordCount
+	// 计算有效记录计数并将其保存在数据库中。记录计数
 	db.RecordCount, err = db.getRecordCount()
 	return
 }
@@ -543,12 +545,12 @@ func (db *DB) parseDataFiles(dataFileIds []int) (err error) {
 func (db *DB) getRecordCount() (int64, error) {
 	var res int64
 
-	// Iterate through the BTree indices
+	// 循环访问 BTree 索引
 	for _, btree := range db.Index.bTree.idx {
 		res += int64(btree.Count())
 	}
 
-	// Iterate through the List indices
+	// 循环访问列表索引
 	for _, listItem := range db.Index.list.idx {
 		for key := range listItem.Items {
 			curLen, err := listItem.Size(key)
@@ -775,7 +777,7 @@ func (db *DB) buildListLRemIdx(value []byte, l *List, key []byte) error {
 	})
 }
 
-// buildIndexes builds indexes when db initialize resource.
+// buildIndexes 在数据库初始化资源时构建索引。
 func (db *DB) buildIndexes() (err error) {
 	var (
 		maxFileID   int64
@@ -821,7 +823,7 @@ func (db *DB) createRecordByModeWithFidAndOff(fid int64, off uint64, entry *Entr
 	return record
 }
 
-// managed calls a block of code that is fully contained in a transaction.
+// managed 调用事务中完全包含的代码块。
 func (db *DB) managed(writable bool, fn func(tx *Tx) error) (err error) {
 	var tx *Tx
 
@@ -868,7 +870,7 @@ func (db *DB) checkListExpired() {
 	})
 }
 
-// IsClose return the value that represents the status of DB
+// IsClose 返回表示 DB 状态的值
 func (db *DB) IsClose() bool {
 	return db.closed
 }

@@ -26,15 +26,15 @@ import (
 )
 
 const (
-	// txStatusRunning means the tx is running
+	// txStatusRunning 表示 TX 正在运行
 	txStatusRunning = 1
-	// txStatusCommitting means the tx is committing
+	// txStatusCommitting 表示 tx 正在提交
 	txStatusCommitting = 2
-	// txStatusClosed means the tx is closed, ether committed or rollback
+	// txStatusClosed 表示 TX 已关闭、可能提交或回滚
 	txStatusClosed = 3
 )
 
-// Tx represents a transaction.
+// Tx 事务实体类型
 type Tx struct {
 	id                uint64
 	db                *DB
@@ -581,6 +581,7 @@ func (tx *Tx) handleErr(err error) {
 	}
 }
 
+// checkTxIsClosed 判断Tx（事务）是否关闭
 func (tx *Tx) checkTxIsClosed() error {
 	if tx.db == nil {
 		return ErrTxClosed
@@ -588,8 +589,9 @@ func (tx *Tx) checkTxIsClosed() error {
 	return nil
 }
 
-// put sets the value for a key in the bucket.
-// Returns an error if tx is closed, if performing a write operation on a read-only transaction, if the key is empty.
+// put 设置存储桶中键的值。
+// 如果 tx 已关闭，如果对只读事务执行写入操作，如果键为空，则返回错误。
+// bucket BucketName
 func (tx *Tx) put(bucket string, key, value []byte, ttl uint32, flag uint16, timestamp uint64, ds uint16) error {
 	if err := tx.checkTxIsClosed(); err != nil {
 		return err

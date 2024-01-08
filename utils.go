@@ -26,7 +26,7 @@ import (
 	"github.com/xujiajun/utils/strconv2"
 )
 
-// Truncate changes the size of the file.
+// Truncate 更改文件的大小。
 func Truncate(path string, capacity int64, f *os.File) error {
 	fileInfo, _ := os.Stat(path)
 	if fileInfo.Size() < capacity {
@@ -84,7 +84,7 @@ func MatchForRange(pattern, bucket string, f func(bucket string) bool) (end bool
 	return false, nil
 }
 
-// getDataPath returns the data path for the given file ID.
+// getDataPath 返回给定文件 ID 的数据路径。
 func getDataPath(fID int64, dir string) string {
 	separator := string(filepath.Separator)
 	return dir + separator + strconv2.Int64ToStr(fID) + DataSuffix

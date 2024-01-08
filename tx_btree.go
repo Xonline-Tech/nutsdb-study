@@ -35,18 +35,19 @@ func (tx *Tx) PutWithTimestamp(bucket string, key, value []byte, ttl uint32, tim
 	return tx.put(bucket, key, value, ttl, DataSetFlag, timestamp, DataStructureBTree)
 }
 
-// Put sets the value for a key in the bucket.
-// a wrapper of the function put.
+// Put 设置存储桶中键的值。
+// 函数 put 的包装器。
 func (tx *Tx) Put(bucket string, key, value []byte, ttl uint32) error {
 	return tx.put(bucket, key, value, ttl, DataSetFlag, uint64(time.Now().UnixMilli()), DataStructureBTree)
 }
 
-// PutIfNotExists set the value for a key in the bucket only if the key doesn't exist already.
+// PutIfNotExists 仅当存储桶中的键尚不存在时，才设置该键的值。
 func (tx *Tx) PutIfNotExists(bucket string, key, value []byte, ttl uint32) error {
 	if err := tx.checkTxIsClosed(); err != nil {
 		return err
 	}
 
+	// 获取Bucket
 	b, err := tx.db.bm.GetBucket(DataStructureBTree, bucket)
 	if err != nil {
 		return err

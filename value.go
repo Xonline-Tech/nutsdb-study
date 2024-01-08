@@ -42,6 +42,6 @@ func (req *request) DecrRef() {
 func (req *request) Wait() error {
 	req.Wg.Wait()
 	err := req.Err
-	req.DecrRef() // DecrRef after writing to DB.
+	req.DecrRef() // 写入 DB 后的 DecrRef。
 	return err
 }

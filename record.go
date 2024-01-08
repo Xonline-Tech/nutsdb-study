@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// Record means item of indexes in memory
+// Record 表示内存中的索引项
 type Record struct {
 	Key       []byte
 	Value     []byte
@@ -30,12 +30,12 @@ type Record struct {
 	TxID      uint64
 }
 
-// IsExpired returns the record if expired or not.
+// IsExpired 返回记录是否过期。
 func (r *Record) IsExpired() bool {
 	return IsExpired(r.TTL, r.Timestamp)
 }
 
-// IsExpired checks the ttl if expired or not.
+// IsExpired 检查 TTL 是否过期。
 func IsExpired(ttl uint32, timestamp uint64) bool {
 	if ttl == Persistent {
 		return false
@@ -48,7 +48,7 @@ func IsExpired(ttl uint32, timestamp uint64) bool {
 	return expireTime.Before(now)
 }
 
-// NewRecord generate a record Obj
+// NewRecord 生成记录 Obj
 func NewRecord() *Record {
 	return new(Record)
 }

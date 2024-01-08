@@ -30,14 +30,14 @@ const (
 type ExpiredDeleteType uint8
 
 const (
-	// TimeWheel represents use time wheel to do expired deletion
+	// TimeWheel 表示使用时间轮执行过期删除
 	TimeWheel ExpiredDeleteType = iota
 
-	// TimeHeap represents use time heap to do expired deletion
+	// TimeHeap 表示使用时间堆执行过期删除
 	TimeHeap
 )
 
-// An ErrorHandler handles an error occurred during transaction.
+// An ErrorHandler 处理事务期间发生的错误。
 type ErrorHandler interface {
 	HandleError(err error)
 }
@@ -111,15 +111,15 @@ type Options struct {
 	// MaxBatchSize represents max batch size in bytes
 	MaxBatchSize int64
 
-	// ExpiredDeleteType represents the data structure used for expired deletion
-	// TimeWheel means use the time wheel, You can use it when you need high performance or low memory usage
-	// TimeHeap means use the time heap, You can use it when you need to delete precisely or memory usage will be high
+	// ExpiredDeleteType 表示用于过期删除的数据结构
+	// TimeWheel 表示使用时间轮，可以在需要高性能或低内存使用时使用它
+	// TimeHeap 表示使用时间堆，可以在需要精确删除或内存使用率较高时使用它
 	ExpiredDeleteType ExpiredDeleteType
 
-	// max write record num
+	// 最大写入记录数
 	MaxWriteRecordCount int64
 
-	// cache size for HintKeyAndRAMIdxMode
+	// HintKeyAndRAMIdxMode 的缓存大小
 	HintKeyAndRAMIdxCacheSize int
 }
 
@@ -139,17 +139,17 @@ var defaultSegmentSize int64 = 256 * MB
 // DefaultOptions represents the default options.
 var DefaultOptions = func() Options {
 	return Options{
-		EntryIdxMode:      HintKeyValAndRAMIdxMode,
-		SegmentSize:       defaultSegmentSize,
-		NodeNum:           1,
-		RWMode:            FileIO,
-		SyncEnable:        true,
-		CommitBufferSize:  4 * MB,
-		MergeInterval:     2 * time.Hour,
-		MaxBatchSize:      (15 * defaultSegmentSize / 4) / 100,
-		MaxBatchCount:     (15 * defaultSegmentSize / 4) / 100 / 100,
+		EntryIdxMode:              HintKeyValAndRAMIdxMode,
+		SegmentSize:               defaultSegmentSize,
+		NodeNum:                   1,
+		RWMode:                    FileIO,
+		SyncEnable:                true,
+		CommitBufferSize:          4 * MB,
+		MergeInterval:             2 * time.Hour,
+		MaxBatchSize:              (15 * defaultSegmentSize / 4) / 100,
+		MaxBatchCount:             (15 * defaultSegmentSize / 4) / 100 / 100,
 		HintKeyAndRAMIdxCacheSize: 0,
-		ExpiredDeleteType: TimeWheel,
+		ExpiredDeleteType:         TimeWheel,
 	}
 }()
 
@@ -186,9 +186,9 @@ func WithMaxBatchCount(count int64) Option {
 }
 
 func WithHintKeyAndRAMIdxCacheSize(size int) Option {
-    return func(opt *Options) {
-        opt.HintKeyAndRAMIdxCacheSize = size
-    }
+	return func(opt *Options) {
+		opt.HintKeyAndRAMIdxCacheSize = size
+	}
 }
 
 func WithMaxBatchSize(size int64) Option {

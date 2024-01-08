@@ -27,26 +27,26 @@ func init() {
 	BucketMetaSize = GetDiskSizeFromSingleObject(BucketMeta{})
 }
 
-// BucketMeta stores the Meta info of a Bucket. E.g. the size of bucket it store in disk.
+// BucketMeta 存储存储桶的元信息。例如，它存储在磁盘中的存储桶的大小。
 type BucketMeta struct {
 	Crc uint32
-	// Op: Mark the latest operation (e.g. delete, insert, update) for this bucket.
+	// Op: 标记此存储桶的最新操作（例如删除、插入、更新）。
 	Op BucketOperation
-	// Size: the size of payload.
+	// Size: 有效负载的大小。
 	Size uint32
 }
 
-// Bucket is the disk structure of bucket
+// Bucket 是存储桶的磁盘结构
 type Bucket struct {
-	// Meta: the metadata for this bucket
+	// Meta: 此存储桶的元数据
 	Meta *BucketMeta
-	// Id: is the marker for this bucket, every bucket creation activity will generate a new Id for it.
-	// for example. If you have a bucket called "bucket_1", and you just delete bucket and create it again.
-	// the last bucket will have a different Id from the previous one.
+	// Id: 是此存储桶的标记，则每个存储桶创建活动都会为其生成一个新的 ID。
+	// 例如。如果您有一个名为“bucket_1”的存储桶，并且您只需删除存储桶并重新创建它。
+	// 最后一个存储桶的 ID 将与前一个存储桶不同。
 	Id BucketId
-	// Ds: the data structure for this bucket. (List, Set, SortSet, String)
+	// Ds: 此存储桶的数据结构。（列表、 集、 排序集、 字符串）
 	Ds Ds
-	// Name: the name of this bucket.
+	// Name: 此存储桶的名称。
 	Name string
 }
 
